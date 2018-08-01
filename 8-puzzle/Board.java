@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.Queue;
 
+
 public class Board {
 	private final int dimension;
 	private final int[][] blocks;
@@ -7,100 +8,120 @@ public class Board {
 	private int blankCol;
 	
 	public Board(int[][] blocks) {
-		if (blocks == null)
-			throw new IllegalArgumentException();
-		int row = blocks.length;
-		int col = blocks[0].length;
-		if (row != col)
-			throw new IllegalArgumentException();
-		
-		dimension = row;
-		this.blocks = blocks;
+	    if (blocks == null)
+	        throw new IllegalArgumentException();
+	    int row = blocks.length;
+	    int col = blocks[0].length;
+	    if (row != col)
+	        throw new IllegalArgumentException();
+	    
+	    dimension = row;
+	    this.blocks = blocks;
 	}
-
+	
 	public int dimension() {
-		return dimension;
+	    return dimension;
 	}
 	
 	public int hamming() {
-		int outOfPlaceBlocks = 0;
+	    int outOfPlaceBlocks = 0;
+		int k = 1;
 		for (int i = 0; i < dimension; i++) {
-			for (int j = 0; j < dimension; j++) {
-				if (i == dimension - 1 && j == dimension - 1) {
-					if (blocks[i][j] != 0)
-						outOfPlaceBlocks++;
-				}
-				else if (blocks[i][j] != ((i - 1) * dimension + j + 1))
-					outOfPlaceBlocks++;
-			}
+	        for (int j = 0; j < dimension; j++) {
+	        	if (i == dimension - 1 && j == dimension - 1)
+	        	{
+	        		if (blocks[i][j] != 0) outOfPlaceBlocks++;
+	        	}
+	        	else if (blocks[i][j] != k) outOfPlaceBlocks++;
+	        	k++;
 		}
-		return outOfPlaceBlocks;
+		}
+	        return outOfPlaceBlocks;
 	}
 	
 	public int manhattan() {
-		throw new IllegalArgumentException();
+	    int sum = 0;
+	
+	    for (int i = 0; i < this.dimension(); i++) {
+	        for (int j = 0; j < this.dimension(); j++) {
+	            if (blocks[i][j] != 0)
+	                sum += Math.abs(blocks[i][j] - i) + Math.abs(blocks[i][j] - j);
+	        }
+	    }
+	
+	    return sum;
 	}
 	
 	public boolean isGoal() {
-		return hamming() == 0;
+	    return hamming() == 0;
 	}
 	
 	public Board twin() {
-		throw new IllegalArgumentException();
+	    for (int i = 0; i < dimension; i++) {
+	        for (int j = 0; j < dimension; j++) {
+	            if (blocks[i][j] != 0 && blocks[i][j+1] != 0) {
+	                int[][] twinBoard = getClone();
+	                swapDown(getClone(), i, j);
+	                return new Board(twinBoard);
+	            }
+	        }
+	    }
+	
+	    throw new RuntimeException();
 	}
 	
 	public boolean equals(Object other) {
-		if (other == this) return true;
-        if (other == null) return false;
-        if (other.getClass() != this.getClass()) return false;
-        
-        Board otherBoard = (Board) other;
-        if (otherBoard.dimension() == this.dimension()) return false;
-        
-        for (int i = 0; i < this.dimension(); i++) {
-        	for (int j = 0; j < this.dimension(); j++) {
-        		if (otherBoard.blocks[i][j] != this.blocks[i][j])
-        			return false;
-        	}
-        }
-        
-        return true;        
+	    if (other == this) return true;
+	    if (other == null) return false;
+	    if (other.getClass() != this.getClass()) return false;
+	    
+	    Board otherBoard = (Board) other;
+	    if (otherBoard.dimension() == this.dimension()) return false;
+	    
+	    for (int i = 0; i < this.dimension(); i++) {
+	        for (int j = 0; j < this.dimension(); j++) {
+	            if (otherBoard.blocks[i][j] != this.blocks[i][j])
+	                return false;
+	        }
+	    }
+	    
+	    return true;        
 	}
 	
 	public Iterable<Board> neighbors() {
-		Queue<Board> neighbors = new Queue<Board>();
-		
-		findBlankBlock();
-		
-		if (blankRow - 1 > 0) {
-			int[][] neighbor = blocks.clone();
-			swapLeft(neighbor, blankRow, blankCol);
-			neighbors.enqueue(new Board(neighbor));	
-		}
-		
-		if (blankRow + 1 < dimension) {
-			int[][] neighbor = blocks.clone();
-			swapRight(neighbor, blankRow, blankCol);
-			neighbors.enqueue(new Board(neighbor));	
-		}
-		
-		if (blankCol + 1 < dimension) {
-			int[][] neighbor = blocks.clone();
-			swapDown(neighbor, blankRow, blankCol);
-			neighbors.enqueue(new Board(neighbor));	
-		}
-		
-		if (blankCol - 1 > 0) {
-			int[][] neighbor = blocks.clone();
-			swapUp(neighbor, blankRow, blankCol);
-			neighbors.enqueue(new Board(neighbor));	
-		}
-		
-		return neighbors;
+	    Queue<Board> neighbors = new Queue<Board>();
+	    
+	    findBlankBlock();
+	    
+	    if (blankRow - 1 >= 0) {
+	        int[][] neighbor = getClone();
+	        swapLeft(neighbor, blankRow, blankCol);
+	        neighbors.enqueue(new Board(neighbor));	
+	    }
+	    
+	    if (blankRow + 1 < dimension) {
+	        int[][] neighbor = getClone();
+	        swapRight(neighbor, blankRow, blankCol);
+	        neighbors.enqueue(new Board(neighbor));	
+	    }
+	    
+	    if (blankCol + 1 < dimension) {
+	        int[][] neighbor = getClone();
+	        swapDown(neighbor, blankRow, blankCol);
+	        neighbors.enqueue(new Board(neighbor));	
+	    }
+	    
+	    if (blankCol - 1 >= 0) {
+	        int[][] neighbor = getClone();
+	        swapUp(neighbor, blankRow, blankCol);
+	        neighbors.enqueue(new Board(neighbor));	
+	    }
+	    
+	    return neighbors;
 	}
 	
 	public String toString() {
-		StringBuilder s = new StringBuilder();
+	    StringBuilder s = new StringBuilder();
 	    s.append(dimension + "\n");
 	    for (int i = 0; i < dimension; i++) {
 	        for (int j = 0; j < dimension; j++) {
@@ -112,46 +133,52 @@ public class Board {
 	}
 	
 	private void swapUp(int[][] tBlocks, int i, int j) {
-		if (j - 1 < 0) throw new IllegalArgumentException();
-		int temp = tBlocks[i][j];
-		tBlocks[i][j] = tBlocks[i][j-1];
-		tBlocks[i][j-1] = temp;
+	    if (j - 1 < 0) throw new IllegalArgumentException();
+	    int temp = tBlocks[i][j];
+	    tBlocks[i][j] = tBlocks[i][j-1];
+	    tBlocks[i][j-1] = temp;
 	}
 	
 	private void swapDown(int[][] tBlocks, int i, int j) {
-		if (j + 1 > dimension) throw new IllegalArgumentException();
-		int temp = tBlocks[i][j];
-		tBlocks[i][j] = tBlocks[i][j+1];
-		tBlocks[i][j+1] = temp;
+	    if (j + 1 > dimension) throw new IllegalArgumentException();
+	    int temp = tBlocks[i][j];
+	    tBlocks[i][j] = tBlocks[i][j+1];
+	    tBlocks[i][j+1] = temp;
 	}
 	
 	private void swapLeft(int[][] tBlocks, int i, int j) {
-		if (i - 1 < 0) throw new IllegalArgumentException();
-		int temp = tBlocks[i][j];
-		tBlocks[i][j] = tBlocks[i-1][j];
-		tBlocks[i-1][j] = temp;
+	    if (i - 1 < 0) throw new IllegalArgumentException();
+	    int temp = tBlocks[i][j];
+	    tBlocks[i][j] = tBlocks[i-1][j];
+	    tBlocks[i-1][j] = temp;
 	}
 	
 	private void swapRight(int[][] tBlocks, int i, int j) {
-		if (i + 1 > dimension) throw new IllegalArgumentException();
-		int temp = tBlocks[i][j];
-		tBlocks[i][j] = tBlocks[i+1][j];
-		tBlocks[i+1][j] = temp;
+	    if (i + 1 > dimension) throw new IllegalArgumentException();
+	    int temp = tBlocks[i][j];
+	    tBlocks[i][j] = tBlocks[i+1][j];
+	    tBlocks[i+1][j] = temp;
 	}
 	
 	private void findBlankBlock() {
-		for (int i = 0; i < dimension; i++) {
-			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] == 0) {
-					this.blankRow = i;
-					this.blankCol = j;
-					return;
-				}
-			}
-		}
+	    for (int i = 0; i < dimension; i++) {
+	        for (int j = 0; j < dimension; j++) {
+	            if (blocks[i][j] == 0) {
+	                this.blankRow = i;
+	                this.blankCol = j;
+	                return;
+	            }
+	        }
+	    }
 	}
 	
-    public static void main(String[] args) {
-
-    }
+	private int[][] getClone() {
+	    int[][] clone = new int[dimension][dimension];
+	    for (int i = 0; i < dimension; i++) {
+	        for (int j = 0; j < dimension; j++) {
+	            clone[i][j] = blocks[i][j];
+	        }
+	    }
+	    return clone;
+	}
 }
