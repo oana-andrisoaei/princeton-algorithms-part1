@@ -1,6 +1,5 @@
 import edu.princeton.cs.algs4.Queue;
 
-
 public class Board {
 	private final int dimension;
 	private final int[][] blocks;
@@ -16,7 +15,12 @@ public class Board {
 	        throw new IllegalArgumentException();
 	    
 	    dimension = row;
-	    this.blocks = blocks;
+	    this.blocks = new int[row][col];
+	    for (int i = 0; i < row; i++) {
+	        for (int j = 0; j < col; j++) {
+	        	this.blocks[i][j] = blocks[i][j];
+	        }
+	    }
 	}
 	
 	public int dimension() {
@@ -28,28 +32,20 @@ public class Board {
 		int k = 1;
 		for (int i = 0; i < dimension; i++) {
 	        for (int j = 0; j < dimension; j++) {
-	        	if (i == dimension - 1 && j == dimension - 1)
-	        	{
-	        		if (blocks[i][j] != 0) outOfPlaceBlocks++;
-	        	}
-	        	else if (blocks[i][j] != k) outOfPlaceBlocks++;
+	        	if (blocks[i][j] != k && !(i == dimension - 1 && j == dimension - 1)) outOfPlaceBlocks++;
 	        	k++;
+	        }
 		}
-		}
-	        return outOfPlaceBlocks;
+	   return outOfPlaceBlocks;
 	}
 	
 	public int manhattan() {
-	    int sum = 0;
-	
-	    for (int i = 0; i < this.dimension(); i++) {
-	        for (int j = 0; j < this.dimension(); j++) {
-	            if (blocks[i][j] != 0)
-	                sum += Math.abs(blocks[i][j] - i) + Math.abs(blocks[i][j] - j);
-	        }
-	    }
-	
-	    return sum;
+        int sum = 0;
+        for (int i = 0; i < blocks.length; i++)
+            for (int j = 0; j < blocks.length; j++)
+                if (blocks[i][j] != 0 && blocks[i][j] != j + i * dimension() + 1)
+                    sum += calculateDistance(i, j, blocks[i][j]);
+        return sum;
 	}
 	
 	public boolean isGoal() {
@@ -61,7 +57,7 @@ public class Board {
 	        for (int j = 0; j < dimension; j++) {
 	            if (blocks[i][j] != 0 && blocks[i][j+1] != 0) {
 	                int[][] twinBoard = getClone();
-	                swapDown(getClone(), i, j);
+	                swapDown(twinBoard, i, j);
 	                return new Board(twinBoard);
 	            }
 	        }
@@ -76,7 +72,7 @@ public class Board {
 	    if (other.getClass() != this.getClass()) return false;
 	    
 	    Board otherBoard = (Board) other;
-	    if (otherBoard.dimension() == this.dimension()) return false;
+	    if (otherBoard.dimension() != this.dimension()) return false;
 	    
 	    for (int i = 0; i < this.dimension(); i++) {
 	        for (int j = 0; j < this.dimension(); j++) {
@@ -181,4 +177,11 @@ public class Board {
 	    }
 	    return clone;
 	}
+	
+    private int calculateDistance(int i, int j, int square) {
+        square--;
+        int horizontal = Math.abs(square % dimension() - j);
+        int vertical = Math.abs(square / dimension() - i);
+        return horizontal + vertical;
+    }
 }

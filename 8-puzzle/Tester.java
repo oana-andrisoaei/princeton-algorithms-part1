@@ -14,6 +14,8 @@ public class Tester {
         Board initial = new Board(blocks);
 
         System.out.println(initial.hamming());
+        StdOut.print(initial);
+        StdOut.print(initial.twin());
         // solve the puzzle
         Solver solver = new Solver(initial);
 
