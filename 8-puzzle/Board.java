@@ -32,7 +32,7 @@ public class Board {
 		int k = 1;
 		for (int i = 0; i < dimension; i++) {
 	        for (int j = 0; j < dimension; j++) {
-	        	if (blocks[i][j] != k && !(i == dimension - 1 && j == dimension - 1)) outOfPlaceBlocks++;
+	        	if (blocks[i][j] != k && blocks[i][j] != 0) outOfPlaceBlocks++;
 	        	k++;
 	        }
 		}
